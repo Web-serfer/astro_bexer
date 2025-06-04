@@ -1,0 +1,31 @@
+---
+export async function getStaticPaths() {
+  return [
+    { params: { path: "sign-in" } },
+    { params: { path: "sign-up" } },
+    { params: { path: "reset-password" } },
+    { params: { path: "forgot-password" } },
+  ];
+}
+
+// Получаем текущий путь
+const { path } = Astro.params;
+
+// Определяем компонент
+const AuthComponent = await {
+  "sign-in": (await import("../components/auth/SignIn.astro")).default,
+  "sign-up": (await import("../components/auth/SignUp.astro")).default,
+  "reset-password": (await import("../components/auth/ResetPassword.astro"))
+    .default,
+  "forgot-password": (await import("../components/auth/ForgotPassword.astro"))
+    .default,
+}[path];
+
+// Если маршрут не найден - 404
+if (!AuthComponent) {
+  return Astro.redirect("/404");
+}
+---
+
+<!-- Рендерим компонент -->
+<AuthComponent />

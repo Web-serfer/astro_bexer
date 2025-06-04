@@ -1,0 +1,24 @@
+{
+  "main": [
+    {
+      "name": "Петли",
+      "url": "",
+      "hasChildren": true,
+      "children": [
+        { "name": "Скрытые петли CEAM", "url": "/tags/скрытые-петли-ceam" },
+        { "name": "Другие петли", "url": "/tags/другие-петли" },
+        { "name": "Металлические петли", "url": "/tags/металлические-петли" }
+      ]
+    },
+    { "name": "Блог", "url": "/blog" },
+    { "name": "Отзывы", "url": "/reviews" },
+    { "name": "О компании", "url": "/about" },
+    { "name": "Контакты", "url": "/contact" }
+  ],
+  "footer": [
+    { "name": "Отзывы", "url": "/reviews" },
+    { "name": "О компании", "url": "/about" },
+    { "name": "Контакты", "url": "/contact" },
+    { "name": "Услуги", "url": "/services" }
+  ]
+}
