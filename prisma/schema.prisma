@@ -19,6 +19,12 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // --- ДОБАВЛЕННЫЕ СВЯЗИ ---
+  // Эти строки связывают пользователя с его комментариями и лайками.
+  // Они не мешают работе better-auth.
+  comments Comment[]
+  likes    Like[]
+
   @@unique([email])
   @@map("user")
 }
@@ -66,4 +72,42 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+// --- НОВЫЕ МОДЕЛИ ДЛЯ КОММЕНТАРИЕВ И ЛАЙКОВ ---
+
+// Модель для комментариев к статьям
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text // @db.Text лучше подходит для длинных комментариев
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Связь со статьей через ее уникальный slug из .mdx файла
+  postSlug String @db.VarChar(255)
+
+  // Связь с автором комментария
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Индекс для быстрого поиска всех комментариев к одной статье
+  @@index([postSlug])
+}
+
+// Модель для лайков к статьям
+model Like {
+  // У лайка нет своего id. Уникальность определяется парой "пользователь + статья"
+  userId   String
+  postSlug String @db.VarChar(255)
+
+  createdAt DateTime @default(now())
+
+  // Связь с пользователем, который поставил лайк
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Это гарантирует, что один пользователь может лайкнуть одну статью только один раз.
+  // Это составной первичный ключ.
+  @@id([userId, postSlug])
+  // Индекс для быстрого подсчета лайков у одной статьи
+  @@index([postSlug])
 }
