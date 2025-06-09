@@ -324,7 +324,7 @@ export default function SignUpForm() {
                   {/* Кнопка Зарегистрироваться */}
                   <button
                     type="submit"
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-px hover:bg-indigo-700 hover:shadow active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-px hover:bg-indigo-700 hover:shadow active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
                     disabled={isLoading}
                   >
                     {isLoading ? (

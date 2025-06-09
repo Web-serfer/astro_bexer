@@ -197,7 +197,7 @@ export default function SignInForm({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? (
                   <ImSpinner8 className="h-5 w-5 animate-spin" />
@@ -223,7 +223,7 @@ export default function SignInForm({
                 type="button"
                 onClick={() => handleSocialSignIn("google")}
                 disabled={isGoogleLoading || isVkLoading || isSubmitting}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isGoogleLoading ? (
                   <ImSpinner8 className="h-5 w-5 animate-spin" />
@@ -237,7 +237,7 @@ export default function SignInForm({
                 type="button"
                 onClick={() => handleSocialSignIn("vk")}
                 disabled={isVkLoading || isGoogleLoading || isSubmitting}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-lg border border-transparent bg-[#0077FF] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#006fef] disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-transparent bg-[#0077FF] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#006fef] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isVkLoading ? (
                   <ImSpinner8 className="h-5 w-5 animate-spin" />
