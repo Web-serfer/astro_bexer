@@ -18,7 +18,6 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-  comments      Comment[] // Добавлена связь с комментариями
 
   @@unique([email])
   @@map("user")
@@ -67,33 +66,4 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
-}
-
-model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  approved  Boolean  @default(false) // Модерация комментариев
-  depth     Int      @default(0) // Уровень вложенности
-
-  // Связь с автором комментария
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Связь с родительским комментарием (для вложенных комментариев)
-  parentId String?
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies  Comment[] @relation("CommentReplies")
-
-  // Связь с контентом (постом/статьей)
-  postId       String? // ID связанного поста
-  pageId       String? // ID связанной страницы
-  resourceType String? // Тип ресурса (post, article, product)
-
-  // Индексы для оптимизации запросов
-  @@index([userId])
-  @@index([createdAt])
-  @@index([approved])
-  @@map("comment")
 }

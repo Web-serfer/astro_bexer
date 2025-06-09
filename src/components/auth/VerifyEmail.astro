@@ -1,0 +1,64 @@
+---
+import { prisma } from "@/lib/prisma";
+import Base from "@/layouts/Base.astro";
+
+const token = Astro.url.searchParams.get("token");
+let message = "Проверка email...";
+let isError = false;
+
+if (token) {
+  try {
+    const verification = await prisma.verification.findUnique({
+      where: { value: token },
+      include: { user: true },
+    });
+
+    if (!verification) {
+      message = "Недействительный токен подтверждения";
+      isError = true;
+    } else if (new Date() > verification.expiresAt) {
+      message = "Срок действия ссылки истёк";
+      isError = true;
+    } else {
+      // Обновляем статус пользователя
+      await prisma.user.update({
+        where: { id: verification.userId },
+        data: { emailVerified: true },
+      });
+
+      // Удаляем токен
+      await prisma.verification.delete({
+        where: { id: verification.id },
+      });
+
+      // Перенаправляем на страницу успеха
+      return Astro.redirect("/verification-success");
+    }
+  } catch (error) {
+    message = "Ошибка при обработке запроса";
+    isError = true;
+    console.error("Verification error:", error);
+  }
+} else {
+  message = "Токен подтверждения не предоставлен";
+  isError = true;
+}
+---
+
+<Base title="Подтверждение Email">
+  <main class="container">
+    <div class={`alert ${isError ? "alert-error" : "alert-info"}`}>
+      {message}
+    </div>
+
+    {
+      isError && (
+        <div class="mt-4">
+          <a href="/sign-in" class="btn btn-primary">
+            Вернуться на страницу входа
+          </a>
+        </div>
+      )
+    }
+  </main>
+</Base>

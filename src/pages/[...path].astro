@@ -5,6 +5,10 @@ export async function getStaticPaths() {
     { params: { path: "sign-up" } },
     { params: { path: "reset-password" } },
     { params: { path: "forgot-password" } },
+    // Добавляем новые роуты для верификации
+    { params: { path: "verify-email" } },
+    { params: { path: "verification-success" } },
+    { params: { path: "verification-expired" } },
   ];
 }
 
@@ -19,6 +23,15 @@ const AuthComponent = await {
     .default,
   "forgot-password": (await import("../components/auth/ForgotPassword.astro"))
     .default,
+  // Добавляем компоненты для верификации
+  "verify-email": (await import("../components/auth/VerifyEmail.astro"))
+    .default,
+  "verification-success": (
+    await import("../components/auth/VerificationSuccess.astro")
+  ).default,
+  "verification-expired": (
+    await import("../components/auth/VerificationExpired.astro")
+  ).default,
 }[path];
 
 // Если маршрут не найден - 404
