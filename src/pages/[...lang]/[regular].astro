@@ -10,23 +10,38 @@ export async function getStaticPaths() {
     supportedLang.map(async (lang) => {
       const pages = await getSinglePage("pages", lang as keyof ContentEntryMap);
 
+      if (!pages || pages.length === 0) {
+        return false;
+      }
+
       return pages.map((page) => ({
         params: {
           lang: lang || undefined,
-          regular: page.id.split("/").pop(),
+          regular: page.slug,
         },
         props: {
           page,
         },
       }));
-    }),
+    })
   );
-  return paths.flat();
+
+  return paths.filter(Boolean).flat();
 }
 
 const { page } = Astro.props;
+
+if (!page) {
+  return new Response(null, {
+    status: 404,
+    statusText: "Not Found",
+  });
+}
+
 const { title, meta_title, description, image } = page.data;
 const { Content } = await render(page);
+
+const lang = page.id.split("/")[0];
 ---
 
 <Base
@@ -34,6 +49,8 @@ const { Content } = await render(page);
   meta_title={meta_title}
   description={description}
   image={image}
+  lang={lang}
+  canonical={Astro.url.href}
 >
   <PageHeader title={title} />
   <section class="section">

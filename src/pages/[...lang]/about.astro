@@ -30,7 +30,7 @@ const {
 
 const serviceIndex = await getListPage(
   "services",
-  lang as keyof ContentEntryMap,
+  lang as keyof ContentEntryMap
 );
 const services = await getSinglePage("services", lang as keyof ContentEntryMap);
 const teamIndex = await getListPage("team", lang as keyof ContentEntryMap);
@@ -38,6 +38,7 @@ const team = await getSinglePage("team", lang as keyof ContentEntryMap);
 ---
 
 <Base
+  lang={lang}
   title={title}
   meta_title={meta_title}
   description={description}
@@ -53,7 +54,7 @@ const team = await getSinglePage("team", lang as keyof ContentEntryMap);
             {philosophy_section?.items?.map(
               (
                 item: { title: string; content: string; list: string[] },
-                i: number,
+                i: number
               ) => (
                 <div class="sm:col-6 lg:col-4 mb-10 last:mb-0 lg:mb-0">
                   <h2>
@@ -66,7 +67,7 @@ const team = await getSinglePage("team", lang as keyof ContentEntryMap);
                     ))}
                   </ul>
                 </div>
-              ),
+              )
             )}
           </div>
         </div>

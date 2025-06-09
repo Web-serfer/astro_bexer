@@ -4,38 +4,32 @@ import Social from "@/components/Social.astro";
 import config from "@/config/config.json";
 import social from "@/config/social.json";
 import LanguageSwitcher from "@/helpers/LanguageSwitcher";
-import {
-  getLangFromUrl,
-  getTranslations,
-  slugSelector,
-} from "@/lib/utils/languageParser";
+import { getTranslations, slugSelector } from "@/lib/utils/languageParser";
 import type { ContentEntryMap } from "astro:content";
 import { IoSearch } from "react-icons/io5";
 
-// Получение текущего языка из URL
-let lang = getLangFromUrl(Astro.url);
+export interface Props {
+  lang: string;
+  pathname: string;
+}
+
+const { lang, pathname } = Astro.props;
+
 const menu = await getTranslations(lang as keyof ContentEntryMap);
 
 // Деструктуризация конфига
 const { navigation_button, settings } = config;
 const { default_language, top_header } = config.settings;
 const { email, phone } = config.params;
-const { pathname } = Astro.url;
 
 // Загрузка переводов для кнопок
 const { get_quote, connect_with_us, call_now } = await getTranslations(
   lang as keyof ContentEntryMap
 );
-
-// Проверка отключенных языков
-const disabledLanguages = config.settings.disable_languages as string[];
-if (disabledLanguages.includes(lang)) {
-  lang = default_language;
-}
 ---
 
 <!-- Верхняя панель с контактами и соцсетями -->{
-  top_header && ( // Рендерим только если top_header включен в конфиге
+  top_header && (
     <div class="bg-secondary pt-4 pb-2">
       <div class="container">
         <div class="row items-center gy-2">
@@ -104,80 +98,84 @@ if (disabledLanguages.includes(lang)) {
           transform="rotate(45 10 10)"></polygon>
       </svg>
     </label>
-    {/* Конец переключателя мобильного меню */}
+    <!-- Конец переключателя мобильного меню -->
 
-    {/* Основное меню навигации */}
+    <!-- ОТЛАДОЧНЫЙ БЛОК МЕНЮ -->
     <ul
       id="nav-menu"
       class="navbar-nav order-3 hidden w-full pb-6 lg:order-1 lg:flex lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-4"
     >
       {
-        menu?.main.map(
-          // Рендерим пункты меню из конфига
-          (menu: {
-            name: string;
-            url: string;
-            hasChildren: boolean;
-            children: { name: string; url: string }[];
-          }) => (
-            <>
-              {menu.hasChildren ? ( // Если есть подменю
-                <li class="nav-link nav-dropdown group relative">
-                  <span
-                    class={`items-center ${
-                      menu.children
-                        ?.map(({ url }) => slugSelector(url, lang))
-                        .includes(pathname)
-                        ? "active"
-                        : ""
-                    }`}
+        menu?.main.map((item) => {
+          if (item.hasChildren) {
+            const childrenUrls = item.children
+              ?.map((child) => {
+                const result = slugSelector(child.url, lang);
+                return result;
+              })
+              .filter((url): url is string => !!url);
+
+            return (
+              <li class="nav-link nav-dropdown group relative">
+                <span
+                  class:list={[
+                    "items-center",
+                    childrenUrls && childrenUrls.includes(pathname) && "active",
+                  ]}
+                >
+                  {item.name}
+                  <svg
+                    class="h-4 w-4 fill-current inline-block"
+                    viewBox="0 0 20 20"
                   >
-                    {menu.name}
-                    <svg
-                      class="h-4 w-4 fill-current inline-block"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
-                  </span>
-                  <ul class="nav-dropdown-list hidden group-hover:block lg:invisible lg:absolute lg:block lg:opacity-0 lg:group-hover:visible lg:group-hover:opacity-100">
-                    {menu.children?.map(
-                      (child: { name: string; url: string }) => (
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </span>
+                <ul class="nav-dropdown-list hidden group-hover:block lg:invisible lg:absolute lg:block lg:opacity-0 lg:group-hover:visible lg:group-hover:opacity-100">
+                  {item.children?.map((child) => {
+                    const localizedUrl = slugSelector(child.url, lang);
+                    return (
+                      localizedUrl && (
                         <li class="nav-dropdown-item">
                           <a
-                            href={slugSelector(child.url, lang)}
+                            href={localizedUrl}
                             aria-label={child.name}
-                            class={`nav-dropdown-link block ${
-                              pathname === slugSelector(child.url, lang) &&
-                              "active"
-                            }`}
+                            class:list={[
+                              "nav-dropdown-link block",
+                              pathname === localizedUrl && "active",
+                            ]}
                           >
                             {child.name}
                           </a>
                         </li>
                       )
-                    )}
-                  </ul>
-                </li>
-              ) : (
-                // Если нет подменю
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          } else {
+            const localizedUrl = slugSelector(item.url, lang);
+
+            return (
+              localizedUrl && (
                 <li class="nav-item">
                   <a
-                    href={slugSelector(menu.url, lang)}
-                    class={`nav-link block ${
-                      pathname === slugSelector(menu.url, lang) && "active"
-                    }`}
+                    href={localizedUrl}
+                    class:list={[
+                      "nav-link block",
+                      pathname === localizedUrl && "active",
+                    ]}
                   >
-                    {menu.name}
+                    {item.name}
                   </a>
                 </li>
-              )}
-            </>
-          )
-        )
+              )
+            );
+          }
+        })
       }
 
-      {/* Кнопка навигации (для мобильной версии) */}
       {
         navigation_button.enable && (
           <li class="mt-4 inline-block lg:hidden">
@@ -191,10 +189,10 @@ if (disabledLanguages.includes(lang)) {
         )
       }
     </ul>
+    <!-- КОНЕЦ ОТЛАДОЧНОГО БЛОКА МЕНЮ -->
 
     {/* Правая часть header'а (поиск, переключатель языка) */}
     <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
-      {/* Кнопка поиска */}
       {
         settings.search && (
           <button
@@ -207,7 +205,7 @@ if (disabledLanguages.includes(lang)) {
         )
       }
 
-      {/* Компонент переключения языка */}
+      {/* Компонент переключения языка теперь получает props */}
       <LanguageSwitcher client:load lang={lang} pathname={pathname} />
 
       {/* Кнопка входа/авторизации */}
@@ -232,18 +230,6 @@ if (disabledLanguages.includes(lang)) {
         </svg>
         <span class="hidden sm:inline">Войти</span>
       </a>
-
-      {
-        /* Кнопка навигации (для десктопной версии - в данный момент закомментирована) */
-      }
-      {
-        /* navigation_button.enable && (
-        <a class="btn btn-primary hover:glow-shadow hidden lg:inline-block"
-          href={slugSelector(navigation_button.link, lang)}>
-          {get_quote}
-        </a>
-      ) */
-      }
     </div>
   </nav>
 </header>

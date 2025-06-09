@@ -3,11 +3,7 @@ import ImageMod from "@/components/ImageMod.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
-import {
-  getLangFromUrl,
-  getTranslations,
-  supportedLang,
-} from "@/lib/utils/languageParser";
+import { getTranslations, supportedLang } from "@/lib/utils/languageParser";
 import { markdownify, titleify } from "@/lib/utils/textConverter";
 import PageHeader from "@/partials/PageHeader.astro";
 import { render, type ContentEntryMap } from "astro:content";
@@ -19,37 +15,47 @@ export async function getStaticPaths() {
     supportedLang.map(async (lang) => {
       const services = await getSinglePage(
         "services",
-        lang as keyof ContentEntryMap,
+        lang as keyof ContentEntryMap
       );
+
+      if (!services || services.length === 0) {
+        return false;
+      }
 
       return services.map((service) => ({
         params: {
           lang: lang || undefined,
-          single: service.id.split("/").pop(),
+          single: service.slug,
         },
         props: {
           service,
         },
       }));
-    }),
+    })
   );
-  return paths.flat();
+
+  return paths.filter(Boolean).flat();
 }
 
 const { service } = Astro.props;
 const { lang } = Astro.params;
+
+if (!service) {
+  return new Response(null, {
+    status: 404,
+    statusText: "Not Found",
+  });
+}
+
 const { title, meta_title, description, image, pdf } = service.data;
 const { Content } = await render(service);
-const land = getLangFromUrl(Astro.url);
+
 const allServices = await getSinglePage(
   "services",
-  land as keyof ContentEntryMap,
+  lang as keyof ContentEntryMap
 );
 
-const serviceSlugs = allServices.map((service) => {
-  const parts = service.id.split("/");
-  return parts[1];
-});
+const serviceSlugs = allServices.map((service) => service.slug);
 
 const {
   send_message,
@@ -69,6 +75,8 @@ const {
   meta_title={meta_title}
   description={description}
   image={image}
+  lang={lang}
+  canonical={Astro.url.href}
 >
   <PageHeader title={title} />
 
@@ -84,12 +92,11 @@ const {
                 serviceSlugs.map((slug: string) => (
                   <li class="border-b border-border pb-4">
                     <a
-                      href={`/services/${slug}`}
-                      class={
-                        service.id.split("/")[1] === `${slug}`
-                          ? "text-primary"
-                          : "text-text" + "block no-underline"
-                      }
+                      href={`/${lang}/services/${slug}`}
+                      class:list={[
+                        service.slug === slug ? "text-primary" : "text-text",
+                        "block no-underline",
+                      ]}
                     >
                       {titleify(slug)}
                     </a>
@@ -116,7 +123,11 @@ const {
                         set:html={markdownify(pdf.size)}
                       />
                     </div>
-                    <a href={pdf.file} class="text-text ml-auto stretched-link">
+                    <a
+                      href={pdf.file}
+                      class="text-text ml-auto stretched-link"
+                      download
+                    >
                       <FaDownload className="icon-xs" />
                     </a>
                   </li>
