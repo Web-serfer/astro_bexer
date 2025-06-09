@@ -9,6 +9,7 @@ import remarkToc from "remark-toc";
 import config from "./src/config/config.json";
 import languagesJSON from "./src/config/language.json";
 import icon from "astro-icon";
+import vercel from "@astrojs/vercel";
 
 const { default_language } = config.settings;
 
@@ -74,4 +75,6 @@ export default defineConfig({
     extendDefaultPlugins: true,
     highlighter: getHighlighter,
   },
+  output: "server",
+  adapter: vercel(),
 });
