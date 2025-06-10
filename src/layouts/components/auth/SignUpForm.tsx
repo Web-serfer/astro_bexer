@@ -17,7 +17,6 @@ interface FormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
-  terms?: string;
   general?: string;
 }
 
@@ -53,7 +52,6 @@ export default function SignUpForm() {
     password: "",
     confirmPassword: "",
   });
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -79,7 +77,6 @@ export default function SignUpForm() {
       newErrors.password = "Пароль должен быть не менее 8 символов.";
     if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = "Пароли не совпадают.";
-    if (!termsAccepted) newErrors.terms = "Вы должны принять условия.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -96,7 +93,6 @@ export default function SignUpForm() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        terms: termsAccepted,
       });
       setIsSuccess(true);
     } catch (error) {
@@ -292,39 +288,10 @@ export default function SignUpForm() {
                     )}
                   </div>
 
-                  {/* Чекбокс Условия */}
-                  <div className="flex items-center pt-2">
-                    <input
-                      id="terms"
-                      name="terms"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                      disabled={isLoading}
-                      required
-                    />
-                    <label
-                      htmlFor="terms"
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      Я принимаю{" "}
-                      <a
-                        href="#"
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
-                      >
-                        условия
-                      </a>
-                    </label>
-                  </div>
-                  {errors.terms && (
-                    <p className="text-sm text-red-600">{errors.terms}</p>
-                  )}
-
                   {/* Кнопка Зарегистрироваться */}
                   <button
                     type="submit"
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-px hover:bg-indigo-700 hover:shadow active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-indigo-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-px hover:bg-indigo-700 hover:shadow active:translate-y-0 active:shadow-sm disabled:cursor-not-allowed disabled:opacity-70"
                     disabled={isLoading}
                   >
                     {isLoading ? (

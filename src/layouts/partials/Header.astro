@@ -15,6 +15,9 @@ export interface Props {
 
 const { lang, pathname } = Astro.props;
 
+// Получаем данные пользователя из middleware.
+const { user } = Astro.locals;
+
 const menu = await getTranslations(lang as keyof ContentEntryMap);
 
 // Деструктуризация конфига
@@ -100,7 +103,6 @@ const { get_quote, connect_with_us, call_now } = await getTranslations(
     </label>
     <!-- Конец переключателя мобильного меню -->
 
-    <!-- ОТЛАДОЧНЫЙ БЛОК МЕНЮ -->
     <ul
       id="nav-menu"
       class="navbar-nav order-3 hidden w-full pb-6 lg:order-1 lg:flex lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-4"
@@ -189,7 +191,6 @@ const { get_quote, connect_with_us, call_now } = await getTranslations(
         )
       }
     </ul>
-    <!-- КОНЕЦ ОТЛАДОЧНОГО БЛОКА МЕНЮ -->
 
     {/* Правая часть header'а (поиск, переключатель языка) */}
     <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
@@ -205,74 +206,206 @@ const { get_quote, connect_with_us, call_now } = await getTranslations(
         )
       }
 
-      {/* Компонент переключения языка теперь получает props */}
       <LanguageSwitcher client:load lang={lang} pathname={pathname} />
 
-      {/* Кнопка входа/авторизации */}
-      <a
-        href="/sign-in"
-        class="ml-5 text-text-dark hover:text-primary transition-colors duration-200 flex items-center"
-        aria-label="Login"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          ></path>
-        </svg>
-        <span class="hidden sm:inline">Войти</span>
-      </a>
+      <!-- --- Блок авторизации --- -->
+      <div class="ml-5">
+        {
+          user ? (
+            // --- Состояние: Пользователь АВТОРИЗОВАН ---
+            <div class="flex items-center gap-4">
+              {/* Аватар и имя - без ссылки и без эффекта наведения */}
+              <div class="flex items-center gap-2 relative">
+                {user.image ? (
+                  <div class="relative">
+                    <img
+                      src={user.image}
+                      alt="Аватар"
+                      class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-md"
+                      width="36"
+                      height="36"
+                    />
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                  </div>
+                ) : (
+                  <div class="relative">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center border-2 border-white shadow-md">
+                      <svg
+                        class="w-5 h-5 text-indigo-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                  </div>
+                )}
+                <span class="hidden sm:inline text-sm font-medium text-text-dark">
+                  {user.name}
+                </span>
+              </div>
+
+              {/* Кнопка выхода с иконкой */}
+              <button
+                id="logout-button"
+                type="button"
+                class="btn btn-sm hover-ripple bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-full"
+                title="Выйти"
+              >
+                <span class="logout-button-content flex items-center justify-center">
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  <span class="ml-2 hidden sm:inline">Выйти</span>
+                </span>
+                <span class="logout-button-loader hidden">
+                  <svg
+                    class="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          ) : (
+            // --- Состояние: Пользователь НЕ АВТОРИЗОВАН ---
+            <a
+              href="/sign-in"
+              class="btn btn-primary hover-ripple btn-sm py-1.5"
+              aria-label="Login"
+            >
+              Войти
+            </a>
+          )
+        }
+      </div>
     </div>
   </nav>
 </header>
 
 <script>
-  // Скрипты для работы меню
   document.addEventListener("astro:page-load", () => {
-    // Переключатель мобильного меню
-    const navbarToggler = document.querySelector(
-      ".navbar-toggler"
-    ) as HTMLElement | null;
-    const navbarMenu = document.querySelector(
-      ".navbar-nav"
-    ) as HTMLElement | null;
+    // --- Логика кнопки выхода ---
+    const logoutButton = document.getElementById("logout-button");
 
-    navbarToggler?.addEventListener("click", () => {
-      navbarToggler.classList.toggle("active");
-      if (navbarMenu) {
-        navbarMenu.classList.toggle("active");
-      }
-    });
+    if (logoutButton) {
+      const buttonContent = logoutButton.querySelector(
+        ".logout-button-content"
+      );
+      const buttonLoader = logoutButton.querySelector(".logout-button-loader");
 
-    // Фиксация header при скролле
-    const header = document.querySelector(".header") as HTMLElement | null;
-    window.addEventListener("scroll", () => {
-      if (header) {
-        if (window.scrollY > 0) {
-          header.classList.add("header-fixed-top");
-        } else {
-          header.classList.remove("header-fixed-top");
+      const resetButtonState = () => {
+        logoutButton.disabled = false;
+        if (buttonContent) buttonContent.classList.remove("hidden");
+        if (buttonLoader) buttonLoader.classList.add("hidden");
+      };
+
+      logoutButton.addEventListener("click", async () => {
+        if (!buttonContent || !buttonLoader) return;
+
+        // 1. Активируем состояние загрузки
+        logoutButton.disabled = true;
+        buttonContent.classList.add("hidden");
+        buttonLoader.classList.remove("hidden");
+
+        try {
+          const response = await fetch("/api/auth/sign-out", {
+            method: "POST",
+          });
+
+          if (response.ok) {
+            // 2. Успех: просто инициируем редирект.
+            // Не сбрасываем состояние кнопки, т.к. страница сейчас исчезнет.
+            window.location.href = "/";
+            return; // Прерываем выполнение функции
+          } else {
+            // 3. Ошибка сервера: выводим сообщение и сбрасываем кнопку.
+            console.error("Ошибка при выходе из системы");
+            alert("Не удалось выйти. Пожалуйста, попробуйте снова.");
+            resetButtonState();
+          }
+        } catch (error) {
+          // 4. Сетевая ошибка: выводим сообщение и сбрасываем кнопку.
+          console.error("Сетевая ошибка при выходе:", error);
+          alert("Произошла ошибка. Проверьте соединение и попробуйте снова.");
+          resetButtonState();
         }
-      }
-    });
-  });
+      });
+    }
 
-  // Обработчики для выпадающих меню на мобильных устройствах
-  const dropdownMenuToggler = document.querySelectorAll(
-    ".nav-dropdown > .nav-link"
-  ) as NodeListOf<HTMLElement>;
-  dropdownMenuToggler.forEach((toggler) => {
-    toggler?.addEventListener("click", (e: Event) => {
-      const target = e.target as HTMLElement;
-      target.parentElement?.classList.toggle("active");
+    // Существующий скрипт для меню
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+    const showButton = document.getElementById("show-button");
+    const hideButton = document.getElementById("hide-button");
+
+    if (navToggle && navMenu && showButton && hideButton) {
+      navToggle.addEventListener("change", () => {
+        if (navToggle.checked) {
+          navMenu.classList.remove("hidden");
+          showButton.classList.add("hidden");
+          hideButton.classList.remove("hidden");
+        } else {
+          navMenu.classList.add("hidden");
+          showButton.classList.remove("hidden");
+          hideButton.classList.add("hidden");
+        }
+      });
+    }
+
+    // Существующий скрипт для фиксации header
+    const header = document.querySelector(".header");
+    const isSticky = header?.classList.contains("sticky");
+    if (header && isSticky) {
+      window.addEventListener("scroll", () => {
+        window.scrollY > 0
+          ? header.classList.add("header-fixed-top")
+          : header.classList.remove("header-fixed-top");
+      });
+    }
+
+    // Существующий скрипт для выпадающих меню
+    const dropdownMenuTogglers = document.querySelectorAll(
+      ".nav-dropdown > span"
+    );
+    dropdownMenuTogglers.forEach((toggler) => {
+      toggler.addEventListener("click", (e) => {
+        (e.currentTarget as HTMLElement).parentElement?.classList.toggle(
+          "active"
+        );
+      });
     });
   });
 </script>

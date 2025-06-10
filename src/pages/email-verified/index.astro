@@ -1,1 +1,8 @@
-<h2>Email verified page</h2>
+---
+import Base from "@/layouts/Base.astro";
+import VerifyEmail from "@/components/auth/VerifyEmail";
+---
+
+<Base title="Страница регистрации">
+  <VerifyEmail client:load />
+</Base>
