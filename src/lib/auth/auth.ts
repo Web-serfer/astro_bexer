@@ -25,7 +25,7 @@ const requiredEnvVars = [
 // Проверка наличия всех переменных
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    throw new Error(`Отсутствует обязательная переменная окружения: ${envVar}`);
+    throw new Error(`Отсутствует переменная .env: ${envVar}`);
   }
 }
 
