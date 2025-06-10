@@ -6,8 +6,9 @@ import { openAPI, emailOTP } from "better-auth/plugins";
 import {
   getVerificationEmailTemplate,
   verificationEmailSubject,
-  getPasswordResetOtpTemplate,
-  passwordResetOtpSubject,
+  // Импорты для сброса по ссылке, которые теперь будут использоваться
+  getPasswordResetLinkTemplate,
+  passwordResetLinkSubject,
 } from "../../lib/email";
 
 const prisma = new PrismaClient();
@@ -89,6 +90,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+
+    // --- Настройка для сброса пароля по ссылке ---
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: passwordResetLinkSubject,
+        text: `Для сброса пароля перейдите по ссылке: ${url}`,
+        html: getPasswordResetLinkTemplate(url),
+      });
+    },
   },
 
   // Верификация по ссылке при регистрации.
@@ -129,13 +140,6 @@ export const auth = betterAuth({
             subject = `Ваш код для подтверждения email: ${otp}`;
             htmlContent = `<p>Ваш одноразовый код для подтверждения email: <strong>${otp}</strong></p><p>Он действителен в течение 5 минут.</p>`;
             textContent = `Ваш одноразовый код для подтверждения email: ${otp}. Он действителен в течение 5 минут.`;
-            break;
-
-          case "forget-password":
-            // Используем специализированный шаблон для сброса пароля
-            subject = passwordResetOtpSubject;
-            htmlContent = getPasswordResetOtpTemplate(otp);
-            textContent = `Ваш одноразовый код для сброса пароля: ${otp}. Используйте его на странице сброса пароля. Код действителен 5 минут.`;
             break;
 
           default:

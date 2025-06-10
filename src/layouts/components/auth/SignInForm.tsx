@@ -55,7 +55,7 @@ export default function SignInForm({
 }: {
   dashboardPath?: string;
 }) {
-  // --- ЛОГИКА И СОСТОЯНИЕ (из вашего образца) ---
+  // --- ЛОГИКА И СОСТОЯНИЕ ---
   const { data: session, isPending: isSessionLoading } = useSession();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -92,8 +92,14 @@ export default function SignInForm({
     if (provider === "google") setIsGoogleLoading(true);
     if (provider === "vk") setIsVkLoading(true);
     setFormErrors({});
+
     try {
-      await authClient.signIn.social({ provider });
+      // ИЗМЕНЕНИЕ ЗДЕСЬ: Добавляем callbackURL как в вашем образце.
+      // Это указывает authClient, куда вернуть пользователя после успешной аутентификации.
+      await authClient.signIn.social({
+        provider: provider,
+        callbackURL: `${window.location.origin}${dashboardPath}`,
+      });
     } catch (error) {
       setFormErrors({ general: getErrorMessage(error) });
       if (provider === "google") setIsGoogleLoading(false);

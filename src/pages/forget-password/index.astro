@@ -1,1 +1,10 @@
-<h2>Forget password page</h2>
+---
+import Base from "@/layouts/Base.astro";
+import { ForgetPasswordForm } from "@/components/auth/ForgetPasswordForm";
+---
+
+<Base title="Восстановление пароля">
+  <div class="flex flex-col items-center justify-center min-h-[80vh] p-5">
+    <ForgetPasswordForm client:load />
+  </div>
+</Base>
