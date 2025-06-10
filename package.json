@@ -8,7 +8,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "yarn generate-json && astro dev --port 3000",
-    "build": "yarn generate-json && astro build",
+    "build": "prisma generate && prisma migrate deploy && yarn generate-json && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier -w ./src",
